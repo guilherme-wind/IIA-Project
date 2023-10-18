@@ -35,12 +35,36 @@ linha10="= = = = = = = = = =\n"
 grelha=linha1+linha2+linha3+linha4+linha5+linha6+linha7+linha8+linha9+linha10
 mundoStandard=parametros + "\n" + grelha
 
-# Distância de Manhatan entre 2 pontos
-#
-def manhatan(p,q):
-    (x1,y1) = p
-    (x2,y2) = q
-    return abs(x1-x2) + abs(y1-y2)
+
+def distancia_entre_pontos(tabuleiro, p1, p2):
+    if not (0 <= p1[0] < len(tabuleiro) and 0 <= p1[1] < len(tabuleiro[0]) 
+            and 0 <= p2[0] < len(tabuleiro) and 0 <= p2[1] < len(tabuleiro[0])):
+        return infinity
+    
+    # A distância entre dois pontos é infinita se apenas houverem obstáculos no caminho
+    distancias = [[infinity for _ in range(len(tabuleiro))] for _ in range(len(tabuleiro[0]))]
+    distancias[p1[0], p1[1]] = 0
+
+    fronteira = []
+    fronteira.append(p1)
+
+    while fronteira:
+        n = fronteira.pop(0)            # nó com menor custo
+
+        vizinhos = []
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if i != 0 or j != 0:
+                    vizinho = (n[0] + i, n[1] + j)
+                    if 0 <= vizinho[0] < len(tabuleiro) and 0 <= vizinho[1] < len(tabuleiro[0]):
+                        vizinhos.append(vizinho)
+        
+        for vizinho in vizinhos:
+            if tabuleiro[vizinho[0]][vizinho[1]] != "=":
+                distancias[vizinho[0], vizinho[1]] = distancias[n[0], n[1]] + 1
+                fronteira.append(vizinho)
+
+    return distancias[p2[0], p2[1]]
 
 
 # A subclasse de Problem: MedoTotal
