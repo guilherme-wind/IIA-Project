@@ -68,15 +68,6 @@ class DistancePoints(Problem):
 class MedoTotalTurbo(Problem):
     """Encontrar um caminho numa grelha 2D com obstáculos. Os obstáculos são células (x, y)."""
 
-    def distancia_entre_pontos(self, p1, p2, obstacles, fantasma):
-        distancia = DistancePoints(p1, p2, obstacles, fantasma)
-
-        # Call the astar_search() function to get the shortest path between the two points.
-        path = astar_search(distancia)
-
-        # The cost of the path is the distance between the two points.
-        return path[-1]
-
 
     def conv_txt_estado(self,txt):
     
@@ -140,7 +131,16 @@ class MedoTotalTurbo(Problem):
         copia_visitadas[npos]=freq+1
         return(EstadoMedoTotal(npos, pastilhas, tempo, medo, copia_visitadas))
     
-    
+
+    def distancia_entre_pontos(self, p1, p2):
+        distancia = DistancePoints(p1, p2, self.obstacles, self.fantasma)
+
+        # Call the astar_search() function to get the shortest path between the two points.
+        path = astar_search(distancia)
+
+        # The cost of the path is the distance between the two points.
+        return path[-1]
+
 
     # situações de falha antecipada
     #
@@ -149,7 +149,7 @@ class MedoTotalTurbo(Problem):
             return False
         if state.pastilhas == set(): # se não há mais pastilhas e eram necessárias
             return True
-        minDist = min(list(map(lambda x: distancia_entre_pontos(state.pacman,x,self.obstacles,self.fantasma),state.pastilhas)))
+        minDist = min(list(map(lambda x: self.distancia_entre_pontos(state.pacman,x),state.pastilhas)))
         if minDist > state.medo: # se não há tempo (manhatan) para chegar à próxima super-pastilha
             return True
         if (state.medo + self.poder * len(state.pastilhas)) < state.tempo:
@@ -213,3 +213,19 @@ class MedoTotalTurbo(Problem):
     
     def minimal_h(self,node):
         return node.state.tempo
+
+
+
+
+
+parametros="T=4\nM=2\nP=10"
+linha1= "= = = = = =\n"
+linha2= "= @ F * . =\n"
+linha3= "= . = . . =\n"
+linha4= "= . . . . =\n"
+linha5= "= . = = . =\n"
+linha6= "= = = = = =\n"
+grelha=linha1+linha2+linha3+linha4+linha5+linha6
+mundoStandardx=parametros + "\n" + grelha
+gx=MedoTotalTurbo(mundoStandardx)
+print(gx.actions(gx.initial))
