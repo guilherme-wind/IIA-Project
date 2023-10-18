@@ -36,41 +36,47 @@ grelha=linha1+linha2+linha3+linha4+linha5+linha6+linha7+linha8+linha9+linha10
 mundoStandard=parametros + "\n" + grelha
 
 
-def distancia_entre_pontos(tabuleiro, p1, p2):
-    if not (0 <= p1[0] < len(tabuleiro) and 0 <= p1[1] < len(tabuleiro[0]) 
-            and 0 <= p2[0] < len(tabuleiro) and 0 <= p2[1] < len(tabuleiro[0])):
-        return infinity
-    
-    # A distância entre dois pontos é infinita se apenas houverem obstáculos no caminho
-    distancias = [[infinity for _ in range(len(tabuleiro))] for _ in range(len(tabuleiro[0]))]
-    distancias[p1[0], p1[1]] = 0
+class DistancePoints(Problem):
+        directions = {"N":(0, -1), "W":(-1, 0), "E":(1,  0),"S":(0, +1)}  # ortogonais
 
-    fronteira = []
-    fronteira.append(p1)
+        def __init__(self, p1, p2, obstacles, fantasma):
+            self.initial = p1
+            self.goal = p2
+            self.obstacles = obstacles
+            self.fantasma = fantasma
 
-    while fronteira:
-        n = fronteira.pop(0)            # nó com menor custo
+        def actions(self, state):
+            x, y = state.pacman
+            return [act for act in self.directions.keys() 
+                if (x+self.directions[act][0],y+self.directions[act][1]) not in (self.obstacles | {self.fantasma})]
 
-        vizinhos = []
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if i != 0 or j != 0:
-                    vizinho = (n[0] + i, n[1] + j)
-                    if 0 <= vizinho[0] < len(tabuleiro) and 0 <= vizinho[1] < len(tabuleiro[0]):
-                        vizinhos.append(vizinho)
-        
-        for vizinho in vizinhos:
-            if tabuleiro[vizinho[0]][vizinho[1]] != "=":
-                distancias[vizinho[0], vizinho[1]] = distancias[n[0], n[1]] + 1
-                fronteira.append(vizinho)
+        def result(self, state, action):
+            raise action
 
-    return distancias[p2[0], p2[1]]
+        def goal_test(self, state):
+            if isinstance(self.goal, list):
+                return state in self.goal
+            else:
+                return state == self.goal
+
+        def h(self, state):
+            return abs(state[0] - self.goal[0]) + abs(state[1] - self.goal[1])
 
 
 # A subclasse de Problem: MedoTotal
 #
 class MedoTotalTurbo(Problem):
     """Encontrar um caminho numa grelha 2D com obstáculos. Os obstáculos são células (x, y)."""
+
+    def distancia_entre_pontos(self, p1, p2, obstacles, fantasma):
+        distancia = DistancePoints(p1, p2, obstacles, fantasma)
+
+        # Call the astar_search() function to get the shortest path between the two points.
+        path = astar_search(distancia)
+
+        # The cost of the path is the distance between the two points.
+        return path[-1]
+
 
     def conv_txt_estado(self,txt):
     
@@ -110,10 +116,6 @@ class MedoTotalTurbo(Problem):
         self.poder = diccio['P']
         self.obstacles=diccio['obstaculos']
         self.dim=diccio['dim']
-        self.distances = {}
-        for p in self.initial.pastilhas:
-            self.distances.add(p)
-
 
 
     directions = {"N":(0, -1), "W":(-1, 0), "E":(1,  0),"S":(0, +1)}  # ortogonais
@@ -147,7 +149,7 @@ class MedoTotalTurbo(Problem):
             return False
         if state.pastilhas == set(): # se não há mais pastilhas e eram necessárias
             return True
-        minDist = min(list(map(lambda x: distancia_entre_pontos(self.tabuleiro, state.pacman,x),state.pastilhas)))
+        minDist = min(list(map(lambda x: distancia_entre_pontos(state.pacman,x,self.obstacles,self.fantasma),state.pastilhas)))
         if minDist > state.medo: # se não há tempo (manhatan) para chegar à próxima super-pastilha
             return True
         if (state.medo + self.poder * len(state.pastilhas)) < state.tempo:
