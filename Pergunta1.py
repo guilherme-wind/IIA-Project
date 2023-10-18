@@ -1,4 +1,4 @@
-
+# from MedoTotal import *
 from collections import namedtuple
 from searchPlus import *
 import timeit    # Para tirar
@@ -46,12 +46,9 @@ class DistancePoints(Problem):
             self.fantasma = fantasma
 
         def actions(self, state):
-            x, y = state.pacman
+            x, y = state
             return [act for act in self.directions.keys() 
                 if (x+self.directions[act][0],y+self.directions[act][1]) not in (self.obstacles | {self.fantasma})]
-
-        def result(self, state, action):
-            raise action
 
         def goal_test(self, state):
             if isinstance(self.goal, list):
@@ -60,7 +57,17 @@ class DistancePoints(Problem):
                 return state == self.goal
 
         def h(self, state):
-            return abs(state[0] - self.goal[0]) + abs(state[1] - self.goal[1])
+            x, y = state.state
+            return abs(x - self.goal[0]) + abs(y - self.goal[1])
+        
+        def path_cost(self,c,state1,action,state2):
+            x1, y1 = state1
+            x2, y2 = state2
+            return abs(x2 - x1) + abs(y2 - y1)
+        
+        def result(self, state, action): 
+            x, y = state
+            return (x+self.directions[action][0],y+self.directions[action][1])
 
 
 # A subclasse de Problem: MedoTotal
@@ -137,9 +144,8 @@ class MedoTotalTurbo(Problem):
 
         # Call the astar_search() function to get the shortest path between the two points.
         path = astar_search(distancia)
-
         # The cost of the path is the distance between the two points.
-        return path[-1]
+        return path.path_cost
 
 
     # situações de falha antecipada
