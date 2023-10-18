@@ -147,7 +147,7 @@ class MedoTotalTurbo(Problem):
             return False
         if state.pastilhas == set(): # se não há mais pastilhas e eram necessárias
             return True
-        minDist = min(list(map(lambda x: manhatan(state.pacman,x),state.pastilhas)))
+        minDist = min(list(map(lambda x: distancia_entre_pontos(self.tabuleiro, state.pacman,x),state.pastilhas)))
         if minDist > state.medo: # se não há tempo (manhatan) para chegar à próxima super-pastilha
             return True
         if (state.medo + self.poder * len(state.pastilhas)) < state.tempo:
