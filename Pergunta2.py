@@ -10,6 +10,9 @@ def depth_first_tree_search_all_count(problem, optimal=False, verbose=False):
         frontier.append(Node(problem.initial))
         while frontier:
             node = frontier.pop()
+            max_mem = max(max_mem, len(frontier))
+            if optimal and node.path_cost >= resultado.path_cost:
+                continue
             if (verbose):
                 print('-'*21, "\n")
                 print(problem.display(node.state))
@@ -31,7 +34,6 @@ def depth_first_tree_search_all_count(problem, optimal=False, verbose=False):
                 if optimal:
                     children = list(filter(lambda c: c.path_cost < resultado.path_cost, children))
                 frontier.extend(children)
-                max_mem = max(max_mem, len(frontier))
             # print("CHILDREN =", len(children))
             # print("MEMÓRIA MAX=", max_mem)
         return (resultado, max_mem, visitados, finais)
