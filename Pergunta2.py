@@ -17,8 +17,11 @@ def depth_first_tree_search_all_count(problem, optimal=False, verbose=False):
                     resultado = node
             elif node.path_cost < resultado.path_cost:
                 temp = len(frontier)
-                frontier.extend(node.expand(problem))
-                max_mem = max(max_mem, (len(frontier) - temp))
+                children = list(node.expand(problem))
+                if children:
+                    children.reverse()
+                frontier.extend(children)
+                max_mem = max(max_mem, len(frontier))
         return (resultado, max_mem, visitados, finais)
 
     resultado, max_mem, visitados, finais = search(problem, Stack())
