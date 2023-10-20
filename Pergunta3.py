@@ -9,8 +9,13 @@ def ida_star_graph_search_count(problem,f,verbose=False):
         new_threshold = infinity
         while frontier:
             node = frontier.pop()
+            if verbose:
+                print("\n" + str(node.state))
+                print("Cost:", node.path_cost, "f=", f(node))
             expandidos+=1
             if problem.goal_test(node.state):
+                if verbose:
+                    print("Goal found within cutoff!")
                 return (node, expandidos, new_threshold)
             explored.add(node.state)            
             children = node.expand(problem)
@@ -18,23 +23,31 @@ def ida_star_graph_search_count(problem,f,verbose=False):
                 children.reverse()
             for child in children:
                 if f(child) > threshold and child.state not in explored:
+                    if verbose:
+                        print("\n" + str(child.state))
+                        print("Cost:", child.path_cost, "f=", f(child))
+                        print("Out of cutoff -- minimum out:", f(child))
                     new_threshold = min(new_threshold, f(child))
                     expandidos += 1
                     explored.add(child.state)
-                elif problem.goal_test(child.state) and f(child) <= threshold and child.state not in explored:
-                    return (child, expandidos, threshold)
-                elif child.state not in explored and child not in frontier and f(child) < threshold:
+                elif child.state not in explored and child not in frontier and f(child) <= threshold:
                     frontier.append(child)
         return (None, expandidos, new_threshold)
 
     threshold = f(Node(problem.initial))
     total_expandidos = 0
     while True:
+        if verbose:
+            print("------Cutoff at", threshold)
         return_node, expandidos, new_treshhold = graph_search_count(problem, Stack(), threshold, f)
         total_expandidos += expandidos
         threshold = new_treshhold
         if return_node is not None and problem.goal_test(return_node.state):
             return return_node, total_expandidos
+        elif return_node is None and new_treshhold == infinity:
+            return None, total_expandidos
+        if verbose:
+            print("\n")
 
 
 
@@ -42,7 +55,7 @@ def ida_star_graph_search_count(problem,f,verbose=False):
 s = ProblemaGrafo()
 print('---------------- IDA* ----------------')
 f=lambda n: n.path_cost + s.h1(n)
-res_IDAstar,visitados=ida_star_graph_search_count(s,f)
+res_IDAstar,visitados=ida_star_graph_search_count(s,f,True)
 if res_IDAstar:
     print("\nSolução:",res_IDAstar.solution(),'com custo',res_IDAstar.path_cost)
 else:
