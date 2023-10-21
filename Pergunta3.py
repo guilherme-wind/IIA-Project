@@ -21,7 +21,7 @@ def ida_star_graph_search_count(problem,f,verbose=False):
                 if f(node) <= threshold:
                     if verbose:
                         print("Goal found within cutoff!")
-                    return (node, expandidos, new_threshold)
+                    return (node, expandidos + len(frontier), new_threshold)
                 elif verbose:
                     print("Out of cutoff -- minimum out:", f(node))
             explored.add(node.state)
@@ -31,7 +31,7 @@ def ida_star_graph_search_count(problem,f,verbose=False):
                 for child in children:
                     if child.state not in explored and child not in frontier:
                         frontier.append(child)
-        return (None, expandidos, new_threshold)
+        return (None, expandidos + len(frontier), new_threshold)
 
     threshold = f(Node(problem.initial))
     total_expandidos = 0
