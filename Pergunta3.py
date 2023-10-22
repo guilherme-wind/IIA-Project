@@ -3,8 +3,8 @@ from GrafoAbstracto import *
 
 def ida_star_graph_search_count(problem,f,verbose=False):
     def graph_search_count(problem, frontier, threshold, f):
-        expandidos = 0
         frontier.append(Node(problem.initial))
+        visited = 1
         explored = set()
         new_threshold = infinity
         while frontier:
@@ -12,7 +12,6 @@ def ida_star_graph_search_count(problem,f,verbose=False):
             if verbose:
                 print("\n" + str(node.state))
                 print("Cost:", node.path_cost, "f=", f(node))
-            expandidos += 1
             if f(node) > threshold:
                 new_threshold = min(new_threshold, f(node))
                 if verbose:
@@ -21,7 +20,7 @@ def ida_star_graph_search_count(problem,f,verbose=False):
                 if f(node) <= threshold:
                     if verbose:
                         print("Goal found within cutoff!")
-                    return (node, expandidos + len(frontier), new_threshold)
+                    return (node, visited, new_threshold)
                 elif verbose:
                     print("Out of cutoff -- minimum out:", f(node))
             explored.add(node.state)
@@ -31,20 +30,21 @@ def ida_star_graph_search_count(problem,f,verbose=False):
                 for child in children:
                     if child.state not in explored and child not in frontier:
                         frontier.append(child)
-        return (None, expandidos + len(frontier), new_threshold)
+                        visited += 1
+        return (None, visited, new_threshold)
 
     threshold = f(Node(problem.initial))
-    total_expandidos = 0
+    total_visitados = 0
     while True:
         if verbose:
             print("------Cutoff at", threshold)
-        return_node, expandidos, new_treshhold = graph_search_count(problem, Stack(), threshold, f)
-        total_expandidos += expandidos
+        return_node, visitados, new_treshhold = graph_search_count(problem, Stack(), threshold, f)
+        total_visitados += visitados
         threshold = new_treshhold
         if return_node is not None and problem.goal_test(return_node.state):
-            return return_node, total_expandidos
+            return return_node, total_visitados
         elif return_node is None and new_treshhold == infinity:
-            return None, total_expandidos
+            return None, total_visitados
         if verbose:
             print("\n")
 
